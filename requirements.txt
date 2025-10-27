@@ -1,0 +1,9 @@
+Flask
+Flask-CORS
+pandas
+requests
+numpy
+python-dotenv
+gunicorn
+cachetools
+dataclasses-json

@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Samarth - Agricultural Insights</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #34a853;
+            --accent: #fbbc05;
+            --dark: #202124;
+            --light: #f8f9fa;
+            --gray: #5f6368;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            color: var(--dark);
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .tagline {
+            color: var(--gray);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .real-time-indicators {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .indicator {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .indicator.live {
+            background: #34a853;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse {
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .indicator.active {
+            background: #34a853;
+            color: white;
+        }
+
+        .indicator.error {
+            background: #ea4335;
+            color: white;
+        }
+
+        .real-time-features {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .feature-tag {
+            padding: 6px 12px;
+            background: #e8f0fe;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: #1a73e8;
+            border: 1px solid #d2e3fc;
+        }
+
+        .query-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .query-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .query-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+        
+        .query-examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .example-card {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .example-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .query-suggestions {
+            margin-bottom: 20px;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .chip {
+            padding: 8px 16px;
+            background: #f1f3f4;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .chip:hover {
+            background: #1a73e8;
+            color: white;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon {
+            margin-right: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 115, 232, 0.3);
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+
+        .execution-time, .data-quality {
+            padding: 4px 12px;
+            background: #f1f3f4;
+            border-radius: 12px;
+        }
+        
+        .visualization-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-container {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            height: 400px;
+        }
+
+        .real-time-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .real-time-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-left: 4px solid #1a73e8;
+        }
+
+        .card-metric {
+            margin: 10px 0;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: block;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .top-crops {
+            margin-top: 15px;
+        }
+
+        .crop-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .data-table th {
+            background: var(--light);
+            font-weight: 600;
+        }
+
+        .quality-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .quality-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .quality-item {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .sources-section {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .source-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .analytics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .data-sources-loading {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .source-loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .visualization-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .analytics-dashboard {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .real-time-indicators {
+                flex-direction: column;
+            }
+
+            .result-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="logo">
+                <h1>🌾 Project Samarth</h1>
+            </div>
+            <div class="tagline">
+                Intelligent Agricultural Insights Platform - Powered by Government Data
+            </div>
+            
+            <!-- Real-time Indicators -->
+            <div class="real-time-indicators">
+                <div class="indicator live">
+                    <span class="pulse"></span>
+                    Live Data
+                </div>
+                <div class="indicator api-status" id="apiStatus">
+                    API: Checking...
+                </div>
+                <div class="indicator last-update" id="lastUpdate">
+                    Last Update: Loading...
+                </div>
+            </div>
+            
+            <!-- Analytics Dashboard -->
+            <div class="analytics-dashboard" id="analyticsDashboard">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Query Section -->
+        <div class="query-section">
+            <h2>Ask Real-time Agricultural Questions</h2>
+            <div class="real-time-features">
+                <div class="feature-tag">🌐 Live Government Data</div>
+                <div class="feature-tag">📊 Real-time Analysis</div>
+                <div class="feature-tag">🔍 Source Verified</div>
+            </div>
+            
+            <textarea 
+                class="query-input" 
+                id="queryInput" 
+                placeholder="e.g., Compare real-time rice production in Maharashtra and Punjab for the last 3 years with current rainfall data..."
+                rows="3"></textarea>
+            
+            <div class="query-suggestions">
+                <h4>Real-time Query Suggestions:</h4>
+                <div class="suggestion-chips">
+                    <div class="chip" onclick="loadSuggestion('current_rainfall')">Current Rainfall Status</div>
+                    <div class="chip" onclick="loadSuggestion('crop_trends')">Live Crop Production Trends</div>
+                    <div class="chip" onclick="loadSuggestion('state_comparison')">State-wise Comparison</div>
+                    <div class="chip" onclick="loadSuggestion('climate_impact')">Climate Impact Analysis</div>
+                </div>
+            </div>
+
+            <div class="query-examples">
+                <div class="example-card" onclick="loadExample(0)">
+                    Compare the average annual rainfall in Maharashtra and Karnataka for the last 3 years. In parallel, list the top 3 most produced crops in each state.
+                </div>
+                <div class="example-card" onclick="loadExample(1)">
+                    Identify the district in Maharashtra with the highest production of Rice in 2023 and compare with Karnataka.
+                </div>
+                <div class="example-card" onclick="loadExample(2)">
+                    Analyze the production trend of Wheat in Punjab over the last 5 years and correlate with rainfall data.
+                </div>
+                <div class="example-card" onclick="loadExample(3)">
+                    Based on historical data, provide arguments to promote drought-resistant crops in Maharashtra.
+                </div>
+            </div>
+            
+            <button class="btn" onclick="processQuery()">
+                <span class="btn-icon">🔍</span>
+                Get Real-time Insights
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <h2>Real-time Analysis Results</h2>
+                <div class="result-meta" id="resultMeta">
+                    <span class="execution-time" id="executionTime"></span>
+                    <span class="data-quality" id="dataQuality"></span>
+                </div>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Fetching real-time data from Government sources...</p>
+                <div class="data-sources-loading">
+                    <div class="source-loading">
+                        <span>🌾</span>
+                        <span>Agriculture Ministry Data</span>
+                    </div>
+                    <div class="source-loading">
+                        <span>🌧️</span>
+                        <span>Meteorological Department</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="resultsContent">
+                <!-- Real-time data indicators -->
+                <div class="real-time-cards" id="realTimeCards"></div>
+                
+                <!-- Visualization Container -->
+                <div class="visualization-container">
+                    <div class="chart-container">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Data Table -->
+                <div id="dataTableContainer"></div>
+
+                <!-- Data Quality Section -->
+                <div class="quality-section" id="qualitySection">
+                    <h3>Data Quality & Freshness</h3>
+                    <div id="qualityMetrics"></div>
+                </div>
+                
+                <!-- Sources Section -->
+                <div class="sources-section" id="sourcesSection">
+                    <h3>Verified Data Sources</h3>
+                    <div id="sourcesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart instances
+        let chart1, chart2;
+        const examples = [
+            "Compare the average annual rainfall in Maharashtra and Karnataka for the last 3 years. In parallel, list the top 3 most produced crops in each state.",
+            "Identify the district in Maharashtra with the highest production of Rice in 2023 and compare with Karnataka.",
+            "Analyze the production trend of Wheat in Punjab over the last 5 years and correlate with rainfall data.",
+            "Based on historical data from the last 5 years, what are the three most compelling data-backed arguments to promote drought-resistant crops over water-intensive crops in Maharashtra?"
+        ];
+
+        const realTimeSuggestions = {
+            'current_rainfall': 'What is the current rainfall status in Maharashtra and Karnataka for this year?',
+            'crop_trends': 'Show me the real-time production trends for Rice and Wheat in Punjab over the last 5 years',
+            'state_comparison': 'Compare agricultural production and rainfall patterns between Maharashtra and Karnataka for the last 3 years',
+            'climate_impact': 'Analyze the impact of rainfall patterns on Wheat production in Uttar Pradesh over the last decade'
+        };
+
+        function loadExample(index) {
+            document.getElementById('queryInput').value = examples[index];
+        }
+
+        function loadSuggestion(type) {
+            document.getElementById('queryInput').value = realTimeSuggestions[type] || '';
+        }
+
+        // API Health Monitoring
+        async function checkAPIHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                const apiStatus = document.getElementById('apiStatus');
+                if (data.status === 'healthy') {
+                    apiStatus.innerHTML = '✅ API: Active';
+                    apiStatus.className = 'indicator api-status active';
+                } else {
+                    apiStatus.innerHTML = '❌ API: Issues';
+                    apiStatus.className = 'indicator api-status error';
+                }
+            } catch (error) {
+                document.getElementById('apiStatus').innerHTML = '❌ API: Offline';
+            }
+        }
+
+        // Update last data refresh
+        function updateLastRefresh() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = 
+                `Last Update: ${now.toLocaleTimeString()}`;
+        }
+
+        async function processQuery() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultsContent').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+
+            try {
+                const response = await axios.post('/api/query', { query });
+                displayResults(response.data);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error processing query. Please try again.');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultsContent').style.display = 'block';
+            }
+        }
+
+        function displayResults(data) {
+            // Destroy existing charts
+            if (chart1) chart1.destroy();
+            if (chart2) chart2.destroy();
+
+            // Update metadata
+            if (data.execution_time) {
+                document.getElementById('executionTime').textContent = 
+                    `Processed in ${data.execution_time}s`;
+            }
+            
+            if (data.data_quality) {
+                document.getElementById('dataQuality').textContent = 
+                    `Data Quality: ${Object.values(data.data_quality).join(', ')}`;
+            }
+            
+            // Display real-time cards for summary data
+            if (data.results.summary) {
+                displayRealTimeCards(data.results.summary);
+            }
+            
+            // Display data quality metrics
+            displayQualityMetrics(data);
+
+            // Display based on query type
+            if (data.results.comparison) {
+                displayComparisonResults(data.results.comparison);
+            } else if (data.results.trends) {
+                displayTrendResults(data.results.trends);
+            } else if (data.results.extremes) {
+                displayExtremesResults(data.results.extremes);
+            } else if (data.results.correlation) {
+                displayCorrelationResults(data.results.correlation);
+            }
+
+            // Display sources
+            displaySources(data.sources);
+        }
+
+        function displayRealTimeCards(summaryData) {
+            const cardsContainer = document.getElementById('realTimeCards');
+            let cardsHTML = '';
+            
+            Object.entries(summaryData).forEach(([state, data]) => {
+                cardsHTML += `
+                    <div class="real-time-card">
+                        <h4>${state}</h4>
+                        <div class="card-metric">
+                            <span class="metric-value">${data.annual_rainfall}mm</span>
+                            <span class="metric-label">Annual Rainfall</span>
+                        </div>
+                        <div class="card-metric">
+                            <span class="metric-value">${data.total_production.toLocaleString()} tons</span>
+                            <span class="metric-label">Total Production</span>
+                        </div>
+                        <div class="top-crops">
+                            ${Object.entries(data.top_crops).map(([crop, production]) => 
+                                `<div class="crop-item">${crop}: ${production.toLocaleString()}t</div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            cardsContainer.innerHTML = cardsHTML;
+        }
+
+        function displayQualityMetrics(data) {
+            const qualitySection = document.getElementById('qualityMetrics');
+            if (data.data_quality && Object.keys(data.data_quality).length > 0) {
+                let qualityHTML = '<div class="quality-grid">';
+                
+                Object.entries(data.data_quality).forEach(([state, metric]) => {
+                    qualityHTML += `
+                        <div class="quality-item">
+                            <strong>${state}:</strong> ${metric}
+                        </div>
+                    `;
+                });
+                
+                qualityHTML += '</div>';
+                qualitySection.innerHTML = qualityHTML;
+            }
+        }
+
+        function displayComparisonResults(comparisonData) {
+            const states = Object.keys(comparisonData);
+            const years = Object.keys(comparisonData[states[0]].rainfall);
+            
+            // Chart 1: Rainfall Comparison
+            const rainfallCtx = document.getElementById('chart1').getContext('2d');
+            const rainfallData = {
+                labels: years,
+                datasets: states.map(state => ({
+                    label: `${state} Rainfall`,
+                    data: years.map(year => comparisonData[state].rainfall[year]),
+                    backgroundColor: state === 'Maharashtra' ? '#1a73e8' : '#34a853',
+                    borderColor: state === 'Maharashtra' ? '#1a73e8' : '#34a853',
+                    borderWidth: 2
+                }))
+            };
+
+            chart1 = new Chart(rainfallCtx, {
+                type: 'bar',
+                data: rainfallData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rainfall Comparison (mm)'
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Crop Production
+            const cropCtx = document.getElementById('chart2').getContext('2d');
+            const crops = Object.keys(comparisonData[states[0]].agriculture[years[0]]);
+            
+            chart2 = new Chart(cropCtx, {
+                type: 'radar',
+                data: {
+                    labels: crops,
+                    datasets: states.map(state => ({
+                        label: state,
+                        data: crops.map(crop => comparisonData[state].agriculture[years[0]][crop]),
+                        backgroundColor: state === 'Maharashtra' ? 'rgba(26, 115, 232, 0.2)' : 'rgba(52, 168, 83, 0.2)',
+                        borderColor: state === 'Maharashtra' ? '#1a73e8' : '#34a853',
+                        borderWidth: 2
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Crop Production Comparison'
+                        }
+                    }
+                }
+            });
+
+            // Create data table
+            let tableHtml = '<h3>Detailed Data</h3><table class="data-table"><tr><th>State</th><th>Year</th>';
+            crops.forEach(crop => {
+                tableHtml += `<th>${crop} Production</th>`;
+            });
+            tableHtml += '<th>Rainfall (mm)</th></tr>';
+
+            states.forEach(state => {
+                years.forEach(year => {
+                    tableHtml += `<tr><td>${state}</td><td>${year}</td>`;
+                    crops.forEach(crop => {
+                        tableHtml += `<td>${comparisonData[state].agriculture[year][crop]?.toLocaleString() || 'N/A'}</td>`;
+                    });
+                    tableHtml += `<td>${comparisonData[state].rainfall[year]?.toLocaleString() || 'N/A'}</td></tr>`;
+                });
+            });
+            tableHtml += '</table>';
+            document.getElementById('dataTableContainer').innerHTML = tableHtml;
+        }
+
+        function displayTrendResults(trendData) {
+            // Implementation for trend charts
+            const states = Object.keys(trendData);
+            const years = Object.keys(trendData[states[0]].rainfall_trend);
+            
+            // Chart 1: Rainfall Trend
+            const rainfallCtx = document.getElementById('chart1').getContext('2d');
+            chart1 = new Chart(rainfallCtx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: states.map(state => ({
+                        label: `${state} Rainfall`,
+                        data: years.map(year => trendData[state].rainfall_trend[year]),
+                        borderColor: getColorForState(state),
+                        backgroundColor: getColorForState(state, 0.1),
+                        tension: 0.4
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rainfall Trends Over Years'
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Production Trend for first crop
+            const cropCtx = document.getElementById('chart2').getContext('2d');
+            const crops = Object.keys(trendData[states[0]].production_trend);
+            
+            chart2 = new Chart(cropCtx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: states.flatMap(state => 
+                        crops.map(crop => ({
+                            label: `${state} - ${crop}`,
+                            data: years.map(year => trendData[state].production_trend[crop][year]),
+                            borderColor: getColorForState(state),
+                            backgroundColor: getColorForState(state, 0.1),
+                            borderDash: crop === 'Wheat' ? [5, 5] : []
+                        }))
+                    )
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Crop Production Trends'
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayExtremesResults(extremesData) {
+            // Implementation for extremes visualization
+            const states = Object.keys(extremesData);
+            
+            // Chart 1: Production Extremes
+            const extremesCtx = document.getElementById('chart1').getContext('2d');
+            chart1 = new Chart(extremesCtx, {
+                type: 'bar',
+                data: {
+                    labels: states,
+                    datasets: [{
+                        label: 'Production (tons)',
+                        data: states.map(state => extremesData[state].production),
+                        backgroundColor: states.map(state => getColorForState(state)),
+                        borderColor: states.map(state => getColorForState(state)),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Crop Production Comparison'
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Pie chart showing distribution
+            const pieCtx = document.getElementById('chart2').getContext('2d');
+            chart2 = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: states,
+                    datasets: [{
+                        data: states.map(state => extremesData[state].production),
+                        backgroundColor: states.map(state => getColorForState(state)),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Production Distribution'
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayCorrelationResults(correlationData) {
+            // Implementation for correlation charts
+            const states = Object.keys(correlationData);
+            const state = states[0];
+            const crops = Object.keys(correlationData[state]);
+            const crop = crops[0];
+            const years = Object.keys(correlationData[state][crop]);
+            
+            // Scatter plot
+            const scatterCtx = document.getElementById('chart1').getContext('2d');
+            const scatterData = years.map(year => ({
+                x: correlationData[state][crop][year].rainfall,
+                y: correlationData[state][crop][year].production
+            }));
+
+            chart1 = new Chart(scatterCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: `${crop} Production vs Rainfall`,
+                        data: scatterData,
+                        backgroundColor: '#1a73e8',
+                        borderColor: '#1a73e8',
+                        pointRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Production vs Rainfall Correlation'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Rainfall (mm)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Production (tons)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Line chart showing both metrics
+            const lineCtx = document.getElementById('chart2').getContext('2d');
+            chart2 = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'Rainfall',
+                            data: years.map(year => correlationData[state][crop][year].rainfall),
+                            borderColor: '#34a853',
+                            backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Production',
+                            data: years.map(year => correlationData[state][crop][year].production),
+                            borderColor: '#1a73e8',
+                            backgroundColor: 'rgba(26, 115, 232, 0.1)',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rainfall and Production Trends'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Rainfall (mm)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Production (tons)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function displaySources(sources) {
+            const sourcesList = document.getElementById('sourcesList');
+            sourcesList.innerHTML = sources.map(source => `
+                <div class="source-item">
+                    <span>📊</span>
+                    <span>${source}</span>
+                </div>
+            `).join('');
+        }
+
+        function getColorForState(state, alpha = 1) {
+            const colors = {
+                'Maharashtra': `rgba(26, 115, 232, ${alpha})`,
+                'Karnataka': `rgba(52, 168, 83, ${alpha})`,
+                'Punjab': `rgba(251, 188, 5, ${alpha})`,
+                'Gujarat': `rgba(234, 67, 53, ${alpha})`,
+                'Tamil Nadu': `rgba(171, 71, 188, ${alpha})`,
+                'Uttar Pradesh': `rgba(66, 133, 244, ${alpha})`
+            };
+            return colors[state] || `rgba(100, 100, 100, ${alpha})`;
+        }
+
+        // Load analytics dashboard
+        async function loadAnalytics() {
+            try {
+                const response = await axios.get('/api/analytics/summary');
+                const data = response.data;
+                
+                document.getElementById('analyticsDashboard').innerHTML = `
+                    <div class="metric-card">
+                        <h3>States Covered</h3>
+                        <div class="metric-value">${data.total_states}</div>
+                        <p>Active data sources</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Crop Types</h3>
+                        <div class="metric-value">${data.total_crops}</div>
+                        <p>Agricultural commodities</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Data Years</h3>
+                        <div class="metric-value">${data.data_years}</div>
+                        <p>Historical analysis</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>Queries Processed</h3>
+                        <div class="metric-value">${data.total_queries}</div>
+                        <p>Insights generated</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Initialize real-time features
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAPIHealth();
+            updateLastRefresh();
+            
+            // Refresh API health every 30 seconds
+            setInterval(checkAPIHealth, 30000);
+            setInterval(updateLastRefresh, 60000);
+            
+            // Load analytics
+            loadAnalytics();
+            
+            // Enter key support for query input
+            document.getElementById('queryInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    processQuery();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
